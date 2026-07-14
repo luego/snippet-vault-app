@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -14,6 +14,7 @@ import {
   initialAuthActionState,
   type AuthActionState,
 } from "@/features/auth/types";
+import { PasswordStrength } from "@/features/auth/components/password-strength";
 
 type AuthMode = "sign-in" | "sign-up" | "forgot" | "reset";
 
@@ -93,11 +94,13 @@ export function AuthForm({
     actions[mode],
     initialAuthActionState,
   );
+  const [passwordValue, setPasswordValue] = useState("");
   const showName = mode === "sign-up";
   const showEmail = mode !== "reset";
   const showPassword =
     mode === "sign-in" || mode === "sign-up" || mode === "reset";
   const showConfirmation = mode === "sign-up" || mode === "reset";
+  const requireStrongPassword = mode === "sign-up" || mode === "reset";
 
   return (
     <div className="auth-card">
@@ -168,13 +171,20 @@ export function AuthForm({
               autoComplete={
                 mode === "sign-in" ? "current-password" : "new-password"
               }
-              minLength={8}
+              minLength={requireStrongPassword ? 12 : 8}
               maxLength={72}
               required
-              aria-describedby={
-                state.fieldErrors?.password ? "password-error" : undefined
-              }
+              onChange={(event) => setPasswordValue(event.currentTarget.value)}
+              aria-describedby={[
+                requireStrongPassword ? "password-strength" : undefined,
+                state.fieldErrors?.password ? "password-error" : undefined,
+              ]
+                .filter(Boolean)
+                .join(" ")}
             />
+            {requireStrongPassword && (
+              <PasswordStrength password={passwordValue} />
+            )}
             <FieldError state={state} name="password" />
           </div>
         )}
@@ -186,7 +196,7 @@ export function AuthForm({
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              minLength={8}
+              minLength={12}
               maxLength={72}
               required
               aria-describedby={

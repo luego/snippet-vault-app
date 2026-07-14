@@ -1,7 +1,6 @@
 import { Menu, Search } from "lucide-react";
-import Link from "next/link";
 
-import { appNavigation } from "@/config/navigation";
+import { AppNavigationLinks } from "@/components/layout/app-navigation-links";
 import { signOut } from "@/features/auth/actions/auth";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
@@ -26,12 +25,7 @@ export function AppTopbar({ displayName }: { displayName: string }) {
           className="mobile-menu-panel"
           aria-label="Mobile application navigation"
         >
-          {appNavigation.map(({ href, label, icon: Icon }) => (
-            <Link className="app-nav-link" href={href} key={href}>
-              <Icon className="size-[18px]" />
-              <span>{label}</span>
-            </Link>
-          ))}
+          <AppNavigationLinks />
         </nav>
       </details>
       <form className="global-search" action="/snippets" method="get">

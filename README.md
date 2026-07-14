@@ -10,6 +10,7 @@ A production-minded, responsive developer workspace for saving, organizing, sear
 - Responsive landing, authentication, and application layouts
 - Light, dark, and system themes
 - Email/password signup, login, logout, and password recovery
+- Strong signup/reset password policy with an accessible live strength meter
 - Cookie-based Supabase SSR sessions with protected application routes
 - PostgreSQL schema, triggers, indexes, grants, and Row Level Security
 - Atomic snippet and tag mutations through authenticated database functions

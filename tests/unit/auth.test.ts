@@ -7,6 +7,8 @@ import {
   signUpSchema,
 } from "../../src/features/auth/schemas/auth";
 import { signUpErrorMessage } from "../../src/features/auth/errors";
+import { evaluatePasswordStrength } from "../../src/features/auth/password-strength";
+import { isAppNavigationActive } from "../../src/config/navigation";
 
 describe("authentication schemas", () => {
   it("normalizes valid sign-in input", () => {
@@ -46,6 +48,50 @@ describe("authentication schemas", () => {
     expect(
       forgotPasswordSchema.safeParse({ email: "developer@example.com" })
         .success,
+    ).toBe(true);
+  });
+
+  it("requires strong passwords for signup and reset", () => {
+    const weakSignup = signUpSchema.safeParse({
+      displayName: "Developer",
+      email: "developer@example.com",
+      password: "correct-horse",
+      confirmPassword: "correct-horse",
+    });
+    const strongReset = resetPasswordSchema.safeParse({
+      password: "CorrectHorse123!",
+      confirmPassword: "CorrectHorse123!",
+    });
+
+    expect(weakSignup.success).toBe(false);
+    expect(strongReset.success).toBe(true);
+  });
+
+  it("scores the same requirements shown by the password meter", () => {
+    expect(evaluatePasswordStrength("password")).toMatchObject({
+      score: 1,
+      label: "Weak",
+    });
+    expect(evaluatePasswordStrength("CorrectHorse123!")).toMatchObject({
+      score: 5,
+      label: "Strong",
+    });
+  });
+});
+
+describe("application navigation", () => {
+  it("activates the current section instead of always selecting dashboard", () => {
+    expect(
+      isAppNavigationActive("/settings/profile", "/settings/profile"),
+    ).toBe(true);
+    expect(isAppNavigationActive("/settings/profile", "/dashboard")).toBe(
+      false,
+    );
+    expect(
+      isAppNavigationActive(
+        "/snippets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/edit",
+        "/snippets",
+      ),
     ).toBe(true);
   });
 });

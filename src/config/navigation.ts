@@ -13,3 +13,8 @@ export const appNavigation = [
   { href: "/tags", label: "Tags", icon: Tags },
   { href: "/settings/profile", label: "Settings", icon: Settings },
 ] as const;
+
+export function isAppNavigationActive(pathname: string, href: string) {
+  const section = href === "/settings/profile" ? "/settings" : href;
+  return pathname === section || pathname.startsWith(`${section}/`);
+}
