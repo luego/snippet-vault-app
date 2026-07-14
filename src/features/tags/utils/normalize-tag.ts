@@ -3,5 +3,5 @@ export function normalizeTag(value: string) {
 }
 
 export function normalizeTags(values: readonly string[]) {
-  return [...new Set(values.map(normalizeTag).filter(Boolean))].slice(0, 10);
+  return [...new Set(values.map(normalizeTag).filter(Boolean))];
 }

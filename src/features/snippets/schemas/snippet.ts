@@ -13,6 +13,9 @@ const tagList = z
   .max(320, "Tags are too long")
   .transform((value) => value.split(","))
   .transform(normalizeTags)
+  .refine((tags) => tags.length <= 10, {
+    message: "Use no more than 10 unique tags",
+  })
   .refine((tags) => tags.every((tag) => tag.length <= 30), {
     message: "Each tag must be 30 characters or fewer",
   });

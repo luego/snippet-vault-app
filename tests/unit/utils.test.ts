@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { snippetSearchParamsSchema } from "../../src/features/snippets/schemas/search-params";
+import { buildSnippetSearchHref } from "../../src/features/snippets/utils/search-query";
 import {
   normalizeTag,
   normalizeTags,
@@ -43,6 +44,28 @@ describe("search parameter validation", () => {
       pageSize: 20,
       sort: "updated-desc",
     });
+  });
+
+  it("normalizes tag values and rejects unknown language filters", () => {
+    const result = snippetSearchParamsSchema.parse({
+      tag: "  TypeScript   Tips ",
+      language: "arbitrary-sql-value",
+    });
+
+    expect(result.tag).toBe("typescript tips");
+    expect(result.language).toBeUndefined();
+  });
+
+  it("serializes shareable list state with only meaningful values", () => {
+    const params = snippetSearchParamsSchema.parse({
+      q: "postgres",
+      language: "sql",
+      page: "2",
+    });
+
+    expect(buildSnippetSearchHref("/snippets", params)).toBe(
+      "/snippets?q=postgres&language=sql&page=2",
+    );
   });
 });
 

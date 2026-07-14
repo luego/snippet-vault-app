@@ -1,4 +1,4 @@
-import { Clock3, LockKeyhole, Star } from "lucide-react";
+import { Clock3, Globe2, LockKeyhole, Star } from "lucide-react";
 import Link from "next/link";
 
 import type { SnippetListItem } from "@/features/snippets/types";
@@ -27,12 +27,25 @@ export function SnippetCard({ snippet }: { snippet: SnippetListItem }) {
       <div className="snippet-card-meta">
         <span className="badge">{language}</span>
         <span>
-          <LockKeyhole className="size-3.5" /> {snippet.visibility}
+          {snippet.visibility === "private" ? (
+            <LockKeyhole className="size-3.5" />
+          ) : (
+            <Globe2 className="size-3.5" />
+          )}{" "}
+          {snippet.visibility}
         </span>
         <span>
           <Clock3 className="size-3.5" /> Updated {updated}
         </span>
       </div>
+      {snippet.tags.length > 0 && (
+        <div className="snippet-card-tags" aria-label="Tags">
+          {snippet.tags.slice(0, 3).map((tag) => (
+            <span key={tag.id}>#{tag.name}</span>
+          ))}
+          {snippet.tags.length > 3 && <span>+{snippet.tags.length - 3}</span>}
+        </div>
+      )}
     </article>
   );
 }

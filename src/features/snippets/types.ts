@@ -20,17 +20,32 @@ export type SnippetListItem = {
   language: SupportedLanguage | string;
   visibility: SnippetVisibility;
   is_favorite: boolean;
-  updated_at: string;
-};
-
-export type SnippetDetail = SnippetListItem & {
-  code: string;
   copy_count: number;
   created_at: string;
+  updated_at: string;
+  tags: SnippetTag[];
+};
+
+export type SnippetDetail = Omit<SnippetListItem, "tags"> & {
+  code: string;
 };
 
 export type SnippetTag = {
   id: string;
   name: string;
   normalized_name: string;
+};
+
+export type TagSummary = SnippetTag & {
+  snippet_count: number;
+  last_used_at: string;
+};
+
+export type DashboardSummary = {
+  total: number;
+  favorites: number;
+  public: number;
+  updatedThisWeek: number;
+  recent: SnippetListItem[];
+  topTags: TagSummary[];
 };

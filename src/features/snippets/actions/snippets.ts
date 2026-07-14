@@ -28,6 +28,8 @@ function logSnippetError(operation: string, error: { code?: string }) {
 function revalidateSnippetPaths(snippetId?: string) {
   revalidatePath("/dashboard");
   revalidatePath("/snippets");
+  revalidatePath("/favorites");
+  revalidatePath("/tags");
   if (snippetId) revalidatePath(`/snippets/${snippetId}`);
 }
 

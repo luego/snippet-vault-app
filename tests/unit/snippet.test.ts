@@ -41,4 +41,17 @@ describe("snippet validation", () => {
       snippetIdSchema.safeParse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa").success,
     ).toBe(true);
   });
+
+  it("rejects more than ten unique tags instead of silently truncating", () => {
+    const result = snippetInputSchema.safeParse({
+      title: "Too many tags",
+      description: "",
+      code: "example",
+      language: "plaintext",
+      visibility: "private",
+      tags: Array.from({ length: 11 }, (_, index) => `tag-${index}`).join(","),
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

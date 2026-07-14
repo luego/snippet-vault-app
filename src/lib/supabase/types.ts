@@ -127,6 +127,41 @@ export type Database = {
         Args: { p_snippet_id: string };
         Returns: undefined;
       };
+      search_snippets: {
+        Args: {
+          p_query?: string | null;
+          p_language?: string | null;
+          p_tag?: string | null;
+          p_favorite?: boolean | null;
+          p_visibility?: "private" | "public" | null;
+          p_sort?: string;
+          p_offset?: number;
+          p_limit?: number;
+        };
+        Returns: {
+          id: string;
+          title: string;
+          description: string | null;
+          language: string;
+          visibility: "private" | "public";
+          is_favorite: boolean;
+          copy_count: number;
+          created_at: string;
+          updated_at: string;
+          tags: Json;
+          total_count: number;
+        }[];
+      };
+      list_tag_summaries: {
+        Args: { p_limit?: number };
+        Returns: {
+          id: string;
+          name: string;
+          normalized_name: string;
+          snippet_count: number;
+          last_used_at: string;
+        }[];
+      };
     };
     Enums: { snippet_visibility: "private" | "public" };
     CompositeTypes: Record<string, never>;

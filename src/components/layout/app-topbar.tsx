@@ -34,11 +34,25 @@ export function AppTopbar({ displayName }: { displayName: string }) {
           ))}
         </nav>
       </details>
-      <label className="global-search">
-        <Search aria-hidden="true" className="size-4" />
-        <span className="sr-only">Search snippets</span>
-        <input type="search" placeholder="Search your snippets…" />
-      </label>
+      <form className="global-search" action="/snippets" method="get">
+        <button
+          className="global-search-submit"
+          type="submit"
+          aria-label="Submit snippet search"
+        >
+          <Search aria-hidden="true" className="size-4" />
+        </button>
+        <label className="sr-only" htmlFor="global-snippet-search">
+          Search snippets
+        </label>
+        <input
+          id="global-snippet-search"
+          name="q"
+          type="search"
+          maxLength={100}
+          placeholder="Search your snippets…"
+        />
+      </form>
       <div className="topbar-actions">
         <ThemeToggle />
         <span className="avatar" aria-label={`Signed in as ${displayName}`}>

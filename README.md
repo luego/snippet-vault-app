@@ -2,7 +2,7 @@
 
 A production-minded, responsive developer workspace for saving, organizing, searching, and selectively sharing reusable code snippets.
 
-> Current status: Milestone 3. Secure snippet creation, listing, detail, editing, deletion, duplication, favorite/visibility controls, tags, copy feedback, and server-side syntax highlighting are implemented. Search and organization begin in Milestone 4.
+> Current status: Milestone 4. Secure snippet CRUD, URL-driven search/filter/sort/pagination, favorites, tag navigation, live dashboard summaries, copy feedback, and server-side syntax highlighting are implemented. Public share pages and final polish begin in Milestone 5.
 
 ## Features
 
@@ -13,6 +13,9 @@ A production-minded, responsive developer workspace for saving, organizing, sear
 - Cookie-based Supabase SSR sessions with protected application routes
 - PostgreSQL schema, triggers, indexes, grants, and Row Level Security
 - Atomic snippet and tag mutations through authenticated database functions
+- RLS-scoped database search with escaped wildcard input and stable pagination
+- Shareable URL filters for query, language, tag, favorite, visibility, and sort
+- Live dashboard totals, recent snippets, top tags, favorites, and tag overview
 - Responsive snippet editor, collection, detail, and delete-confirmation experiences
 - Server-rendered Shiki highlighting with line numbers and inert user content
 - Typed public/server environment boundaries
@@ -27,7 +30,7 @@ Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, next-themes, Zod, Lucid
 
 ## Architecture
 
-Routes compose UI in `src/app`; reusable product behavior lives in `src/features`; shared layout and feedback components live in `src/components`; environment/security utilities live in `src/lib`. Client Components are limited to browser-only theme behavior and error recovery.
+Routes compose UI in `src/app`; reusable product behavior lives in `src/features`; shared layout and feedback components live in `src/components`; environment/security utilities live in `src/lib`. Server Components own data loading while small Client Components handle browser-only form, clipboard, dialog, and theme interactions.
 
 ## Local development
 
@@ -103,4 +106,4 @@ Current controls include strict server/client environment separation, a restrict
 
 ## Trade-offs and future work
 
-The dashboard summary remains clearly labeled sample data until Milestone 4 adds live aggregation, search, filters, and pagination. Milestone 5 adds anonymous public sharing and the remaining critical-path E2E coverage.
+Milestone 5 adds revocable anonymous public sharing, public metadata controls, final accessibility/responsive polish, screenshots, and the remaining critical-path E2E coverage.

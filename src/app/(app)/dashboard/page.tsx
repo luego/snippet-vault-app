@@ -1,62 +1,55 @@
+import { Clock3, Code2, Globe2, Heart, Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Clock3, Code2, Globe2, Heart, Plus } from "lucide-react";
+
+import { EmptyState } from "@/components/feedback/empty-state";
+import { requireVerifiedClaims } from "@/features/auth/server/session";
+import { getDashboardSummary } from "@/features/snippets/server/repository";
+import {
+  SUPPORTED_LANGUAGES,
+  toSupportedLanguage,
+} from "@/lib/constants/languages";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   robots: { index: false, follow: false },
 };
 
-const stats = [
-  ["Total snippets", "48", Code2],
-  ["Favorites", "12", Heart],
-  ["Public", "5", Globe2],
-  ["Updated this week", "8", Clock3],
-] as const;
+export default async function DashboardPage() {
+  const claims = await requireVerifiedClaims();
+  const client = await createClient();
+  const { data, error } = await getDashboardSummary(client, claims.sub);
+  if (error || !data) throw new Error("Unable to load dashboard");
 
-const recent = [
-  [
-    "Type-safe fetch wrapper",
-    "Reusable API request helper with typed errors",
-    "TypeScript",
-    "2m ago",
-  ],
-  [
-    "Postgres RLS policy",
-    "Owner-scoped access policy for new tables",
-    "SQL",
-    "1h ago",
-  ],
-  [
-    "Docker health check",
-    "Minimal health probe for Alpine containers",
-    "Bash",
-    "Yesterday",
-  ],
-  [
-    "Retry with exponential backoff",
-    "Dependency-free async retry helper",
-    "Python",
-    "3d ago",
-  ],
-] as const;
+  const metadata =
+    claims.user_metadata && typeof claims.user_metadata === "object"
+      ? claims.user_metadata
+      : {};
+  const displayName =
+    typeof metadata.display_name === "string"
+      ? metadata.display_name.split(/\s+/u)[0]
+      : "Developer";
+  const stats = [
+    ["Total snippets", data.total, Code2],
+    ["Favorites", data.favorites, Heart],
+    ["Public", data.public, Globe2],
+    ["Updated this week", data.updatedThisWeek, Clock3],
+  ] as const;
 
-export default function DashboardPage() {
   return (
     <main className="app-content">
       <div className="page-heading">
         <div>
-          <h1>Good morning, Alex</h1>
+          <span className="eyebrow">Workspace overview</span>
+          <h1>Welcome back, {displayName}</h1>
           <p>Your code library is ready when you are.</p>
         </div>
         <Link href="/snippets/new" className="button button-primary">
           <Plus className="size-4" /> New snippet
         </Link>
       </div>
-      <div className="foundation-note">
-        <strong>Milestone 3:</strong> Secure snippet CRUD is live in All
-        snippets. Dashboard summaries remain sample data until Milestone 4.
-      </div>
+
       <section className="stats-grid" aria-label="Vault summary">
         {stats.map(([label, value, Icon]) => (
           <article className="stat-card" key={label}>
@@ -70,44 +63,64 @@ export default function DashboardPage() {
           </article>
         ))}
       </section>
-      <div className="dashboard-grid">
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Recent snippets</h2>
-            <Link href="/snippets">View all</Link>
-          </div>
-          {recent.map(([title, description, language, time]) => (
-            <article className="snippet-row" key={title}>
-              <div>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </div>
-              <span className="badge">{language}</span>
-              <span className="snippet-meta">{time}</span>
-            </article>
-          ))}
-        </section>
-        <section className="panel">
-          <div className="panel-header">
-            <h2>Top tags</h2>
-            <Link href="/tags">Manage</Link>
-          </div>
-          <div className="tag-list">
-            {[
-              ["api", 12],
-              ["typescript", 9],
-              ["database", 7],
-              ["docker", 5],
-              ["utilities", 5],
-              ["auth", 4],
-            ].map(([tag, count]) => (
-              <span className="tag-pill" key={tag}>
-                #{tag} <small>{count}</small>
-              </span>
+
+      {data.total === 0 ? (
+        <div className="dashboard-empty">
+          <EmptyState />
+        </div>
+      ) : (
+        <div className="dashboard-grid">
+          <section className="panel">
+            <div className="panel-header">
+              <h2>Recent snippets</h2>
+              <Link href="/snippets">View all</Link>
+            </div>
+            {data.recent.map((snippet) => (
+              <Link
+                href={`/snippets/${snippet.id}`}
+                className="snippet-row"
+                key={snippet.id}
+              >
+                <div>
+                  <h3>{snippet.title}</h3>
+                  <p>{snippet.description || "No description provided."}</p>
+                </div>
+                <span className="badge">
+                  {SUPPORTED_LANGUAGES[toSupportedLanguage(snippet.language)]}
+                </span>
+                <span className="snippet-meta">
+                  {new Intl.DateTimeFormat("en", {
+                    dateStyle: "medium",
+                  }).format(new Date(snippet.updated_at))}
+                </span>
+              </Link>
             ))}
-          </div>
-        </section>
-      </div>
+          </section>
+          <section className="panel">
+            <div className="panel-header">
+              <h2>Top tags</h2>
+              <Link href="/tags">View all</Link>
+            </div>
+            {data.topTags.length ? (
+              <div className="tag-list">
+                {data.topTags.map((tag) => (
+                  <Link
+                    className="tag-pill"
+                    href={`/snippets?tag=${encodeURIComponent(tag.normalized_name)}`}
+                    key={tag.id}
+                  >
+                    #{tag.name} <small>{tag.snippet_count}</small>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="panel-empty">
+                Add tags to see your most-used topics.
+              </p>
+            )}
+          </section>
+        </div>
+      )}
     </main>
   );
 }
