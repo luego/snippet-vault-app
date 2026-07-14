@@ -25,7 +25,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

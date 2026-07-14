@@ -54,8 +54,8 @@ export default function DashboardPage() {
         </Link>
       </div>
       <div className="foundation-note">
-        <strong>Foundation preview:</strong> This polished shell uses sample
-        data. Authentication and live Supabase data arrive in Milestone 2.
+        <strong>Milestone 3:</strong> Secure snippet CRUD is live in All
+        snippets. Dashboard summaries remain sample data until Milestone 4.
       </div>
       <section className="stats-grid" aria-label="Vault summary">
         {stats.map(([label, value, Icon]) => (

@@ -2,9 +2,20 @@ import { Menu, Search } from "lucide-react";
 import Link from "next/link";
 
 import { appNavigation } from "@/config/navigation";
+import { signOut } from "@/features/auth/actions/auth";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
-export function AppTopbar() {
+function initials(value: string) {
+  const parts = value.trim().split(/\s+/u).filter(Boolean);
+  return (
+    parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "SV"
+  );
+}
+
+export function AppTopbar({ displayName }: { displayName: string }) {
   return (
     <header className="app-topbar">
       <details className="mobile-menu">
@@ -30,9 +41,14 @@ export function AppTopbar() {
       </label>
       <div className="topbar-actions">
         <ThemeToggle />
-        <span className="avatar" aria-label="Demo profile">
-          AM
+        <span className="avatar" aria-label={`Signed in as ${displayName}`}>
+          {initials(displayName)}
         </span>
+        <form action={signOut}>
+          <button className="topbar-signout" type="submit">
+            Sign out
+          </button>
+        </form>
       </div>
     </header>
   );

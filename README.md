@@ -2,22 +2,28 @@
 
 A production-minded, responsive developer workspace for saving, organizing, searching, and selectively sharing reusable code snippets.
 
-> Current status: Milestone 1 foundation. The polished marketing site, responsive application shell, theme system, validation utilities, health route, tests, and production container are implemented. Supabase authentication and live data begin in Milestone 2.
+> Current status: Milestone 3. Secure snippet creation, listing, detail, editing, deletion, duplication, favorite/visibility controls, tags, copy feedback, and server-side syntax highlighting are implemented. Search and organization begin in Milestone 4.
 
 ## Features
 
 - Server-rendered Next.js App Router foundation
 - Responsive landing, authentication, and application layouts
 - Light, dark, and system themes
+- Email/password signup, login, logout, and password recovery
+- Cookie-based Supabase SSR sessions with protected application routes
+- PostgreSQL schema, triggers, indexes, grants, and Row Level Security
+- Atomic snippet and tag mutations through authenticated database functions
+- Responsive snippet editor, collection, detail, and delete-confirmation experiences
+- Server-rendered Shiki highlighting with line numbers and inert user content
 - Typed public/server environment boundaries
 - Security headers and a minimal health endpoint
 - Safe redirect, tag normalization, language allowlist, and URL-search validation utilities
-- Unit and browser test foundations
+- Unit, browser, and pgTAP database isolation tests
 - Non-root, read-only-compatible production container
 
 ## Stack
 
-Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, next-themes, Zod, Lucide, Vitest, Playwright, pnpm, and Docker. Supabase Postgres/Auth is planned for Milestone 2.
+Next.js 16, React 19, strict TypeScript, Tailwind CSS 4, next-themes, Zod, Lucide, Vitest, Playwright, Supabase Postgres/Auth with `@supabase/ssr`, pnpm, and Docker.
 
 ## Architecture
 
@@ -25,22 +31,39 @@ Routes compose UI in `src/app`; reusable product behavior lives in `src/features
 
 ## Local development
 
-Prerequisites: Node.js 22.13+ (Node 24 LTS recommended) and pnpm 11.
+Prerequisites: Node.js 22.13+ (Node 24 LTS recommended), pnpm 11, and Docker Desktop when using the local Supabase stack.
 
 ```bash
 cp .env.local.example .env.local
 pnpm install
+pnpm supabase:start
+pnpm supabase:reset
 pnpm dev
 ```
 
-Open `http://localhost:3000`. The Milestone 1 build does not contact Supabase, so placeholder Supabase values are sufficient.
+Copy the local API URL and publishable key printed by `pnpm supabase:start` into `.env.local`, then open `http://localhost:3000`. Stop the local services with `pnpm supabase:stop` when finished. Marketing and health routes can build without Supabase values; authentication requires both public Supabase variables.
 
-## Supabase setup (Milestone 2)
+## Supabase setup
 
 1. Create a Supabase project and copy its URL and publishable key into `.env.local`.
 2. Never expose the service-role key with a `NEXT_PUBLIC_` name.
-3. Apply committed SQL migrations with the Supabase CLI once Milestone 2 adds them.
-4. Configure local and production auth callback URLs explicitly in the Supabase dashboard.
+3. Apply `supabase/migrations` with `supabase db push` for a linked hosted project, or use `pnpm supabase:reset` locally.
+4. Configure the site URL plus `/auth/callback` as an allowed redirect for local and production environments.
+5. Keep email confirmation enabled. Local development uses the Supabase mail viewer printed by the CLI.
+
+For a hosted project, open **Authentication → Email Templates → Confirm signup** and make the confirmation button link to:
+
+```text
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard
+```
+
+Use the following link in the **Reset password** template:
+
+```text
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password
+```
+
+These token-hash endpoints work with cookie-based SSR even when the email opens in a different browser context. Ensure the Supabase Site URL exactly matches `NEXT_PUBLIC_APP_URL`, including the scheme, hostname, and port during local development.
 
 ## Quality checks
 
@@ -48,6 +71,7 @@ Open `http://localhost:3000`. The Milestone 1 build does not contact Supabase, s
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:db
 pnpm build
 pnpm test:e2e
 pnpm check
@@ -58,21 +82,25 @@ Playwright browsers may be installed with `pnpm exec playwright install chromium
 ## Docker
 
 ```bash
-docker build -t snippet-vault .
+docker build \
+  --build-arg NEXT_PUBLIC_APP_URL="$NEXT_PUBLIC_APP_URL" \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
+  -t snippet-vault .
 docker run --rm --env-file .env.local -p 3000:3000 snippet-vault
 curl --fail http://localhost:3000/api/health
 ```
 
-Or run `docker compose up --build`. The container uses Node 24 LTS, runs as an unprivileged user, and exposes only the minimal process health response.
+Export the three public variables before building because Next.js embeds browser-safe values at build time. The publishable key is designed for client use; never pass the service-role key as a build argument. You can also run `docker compose up --build` after exporting them. The container uses Node 24 LTS, runs as an unprivileged user, and exposes only the minimal process health response.
 
 ## Deployment
 
-Deploy to Vercel or any host that supports the standalone Next.js output. Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS origin and add browser-safe Supabase values when Milestone 2 is complete. A live demo URL and product screenshot will be added before release.
+Deploy to Vercel or any host that supports the standalone Next.js output. Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS origin, configure the browser-safe Supabase URL and publishable key, and add the matching callback URL to Supabase Auth. A live demo URL and product screenshot will be added before release.
 
 ## Security
 
-Current controls include strict server/client environment separation, a restrictive baseline CSP, clickjacking and MIME-sniffing headers, safe internal redirect validation, no user-controlled HTML rendering, and non-root container execution. The database schema, RLS isolation policies, verified auth flows, and mutation schemas are explicitly deferred to Milestone 2 and later as required by the build specification. See [SECURITY.md](./SECURITY.md).
+Current controls include strict server/client environment separation, a restrictive baseline CSP, clickjacking and MIME-sniffing headers, safe internal redirect validation, React text rendering for user content, token-based server syntax rendering, non-root container execution, server-validated mutations, verified Supabase claims, least-privilege grants, and RLS policies tested with isolated users. See [SECURITY.md](./SECURITY.md).
 
 ## Trade-offs and future work
 
-The dashboard currently uses clearly labeled sample data so the complete responsive shell can be reviewed before backend work begins. Future milestones add Supabase authentication and RLS, snippet CRUD, tags/search/pagination, server-side syntax highlighting, public sharing, and the full critical-path E2E suite.
+The dashboard summary remains clearly labeled sample data until Milestone 4 adds live aggregation, search, filters, and pagination. Milestone 5 adds anonymous public sharing and the remaining critical-path E2E coverage.

@@ -12,11 +12,14 @@ test("landing page and health endpoint are available", async ({
   await expect(health.json()).resolves.toEqual({ status: "ok" });
 });
 
-test("dashboard foundation fits a mobile viewport", async ({ page }) => {
+test("protected dashboard redirects to a mobile-friendly sign-in", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/sign-in$/);
   await expect(
-    page.getByRole("heading", { name: /good morning/i }),
+    page.getByRole("heading", { name: /welcome back/i }),
   ).toBeVisible();
   const overflow = await page.evaluate(
     () =>

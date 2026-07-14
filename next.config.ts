@@ -2,13 +2,26 @@ import type { NextConfig } from "next";
 
 const isProduction = process.env.NODE_ENV === "production";
 
+function getSupabaseOrigins() {
+  const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!value) return [];
+  try {
+    const origin = new URL(value).origin;
+    return [origin, origin.replace(/^https:/u, "wss:")];
+  } catch {
+    return [];
+  }
+}
+
+const supabaseOrigins = getSupabaseOrigins();
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob: ${supabaseOrigins.filter((origin) => origin.startsWith("https:")).join(" ")}`,
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self' ${supabaseOrigins.join(" ")}`,
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'none'",

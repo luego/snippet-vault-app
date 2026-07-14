@@ -3,4 +3,12 @@ allowBuilds:
   unrs-resolver: true
 
 confirmModulesPurge: false
+minimumReleaseAgeExclude:
+  - "@supabase/auth-js@2.110.5"
+  - "@supabase/functions-js@2.110.5"
+  - "@supabase/postgrest-js@2.110.5"
+  - "@supabase/realtime-js@2.110.5"
+  - "@supabase/ssr@0.12.2"
+  - "@supabase/storage-js@2.110.5"
+  - "@supabase/supabase-js@2.110.5"
 verifyDepsBeforeRun: false
