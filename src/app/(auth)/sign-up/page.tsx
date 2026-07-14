@@ -1,0 +1,10 @@
+import type { Metadata } from "next";
+import { AuthForm } from "@/features/auth/components/auth-form";
+
+export const metadata: Metadata = {
+  title: "Create account",
+  description: "Create your personal Snippet Vault.",
+};
+export default function SignUpPage() {
+  return <AuthForm mode="sign-up" />;
+}
