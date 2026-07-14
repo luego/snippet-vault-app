@@ -27,7 +27,18 @@ export type SnippetListItem = {
 };
 
 export type SnippetDetail = Omit<SnippetListItem, "tags"> & {
+  public_id: string;
   code: string;
+};
+
+export type PublicSnippet = {
+  publicId: string;
+  title: string;
+  description: string | null;
+  code: string;
+  language: SupportedLanguage | string;
+  updatedAt: string;
+  tags: SnippetTag[];
 };
 
 export type SnippetTag = {

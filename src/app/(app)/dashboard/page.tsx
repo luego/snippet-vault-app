@@ -19,7 +19,14 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const claims = await requireVerifiedClaims();
   const client = await createClient();
-  const { data, error } = await getDashboardSummary(client, claims.sub);
+  const [{ data, error }, { data: profile }] = await Promise.all([
+    getDashboardSummary(client, claims.sub),
+    client
+      .from("profiles")
+      .select("display_name")
+      .eq("id", claims.sub)
+      .maybeSingle(),
+  ]);
   if (error || !data) throw new Error("Unable to load dashboard");
 
   const metadata =
@@ -27,9 +34,10 @@ export default async function DashboardPage() {
       ? claims.user_metadata
       : {};
   const displayName =
-    typeof metadata.display_name === "string"
+    profile?.display_name ||
+    (typeof metadata.display_name === "string"
       ? metadata.display_name.split(/\s+/u)[0]
-      : "Developer";
+      : "Developer");
   const stats = [
     ["Total snippets", data.total, Code2],
     ["Favorites", data.favorites, Heart],

@@ -3,13 +3,48 @@ import { expect, test } from "@playwright/test";
 test("landing page and health endpoint are available", async ({
   page,
   request,
-}) => {
+}, testInfo) => {
   await page.goto("/");
   await expect(
     page.getByRole("heading", { name: /your reusable code/i }),
   ).toBeVisible();
   const health = await request.get("/api/health");
   await expect(health.json()).resolves.toEqual({ status: "ok" });
+
+  const skipLink = page.getByRole("link", { name: "Skip to content" });
+  await expect(skipLink).toBeAttached();
+  if (testInfo.project.name === "chromium") {
+    await page.keyboard.press("Tab");
+    await expect(skipLink).toBeFocused();
+    await skipLink.press("Enter");
+    await expect(page.locator("#main-content")).toBeFocused();
+  }
+});
+
+test("crawl controls and social image expose only public marketing routes", async ({
+  request,
+}) => {
+  const robots = await request.get("/robots.txt");
+  expect(await robots.text()).toContain("Disallow: /dashboard");
+
+  const sitemap = await request.get("/sitemap.xml");
+  const sitemapBody = await sitemap.text();
+  expect(sitemapBody).toContain("/privacy");
+  expect(sitemapBody).not.toContain("/snippets");
+
+  const socialImage = await request.get("/opengraph-image");
+  expect(socialImage.ok()).toBe(true);
+  expect(socialImage.headers()["content-type"]).toContain("image/png");
+});
+
+test("invalid public share identifiers fail closed", async ({ page }) => {
+  await page.goto("/s/not-a-uuid");
+  await expect(
+    page.getByRole("heading", { name: /this snippet slipped away/i }),
+  ).toBeVisible();
+  expect(
+    await page.locator('meta[name="robots"][content*="noindex"]').count(),
+  ).toBeGreaterThan(0);
 });
 
 test("protected dashboard redirects to a mobile-friendly sign-in", async ({

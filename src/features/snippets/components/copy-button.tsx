@@ -10,7 +10,7 @@ export function CopyButton({
   snippetId,
 }: {
   code: string;
-  snippetId: string;
+  snippetId?: string;
 }) {
   const [message, setMessage] = useState("");
 
@@ -18,7 +18,7 @@ export function CopyButton({
     try {
       await navigator.clipboard.writeText(code);
       setMessage("Copied");
-      void recordSnippetCopy(snippetId);
+      if (snippetId) void recordSnippetCopy(snippetId);
     } catch {
       setMessage("Copy failed");
     }

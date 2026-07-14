@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  publicIdSchema,
   snippetIdSchema,
   snippetInputSchema,
 } from "../../src/features/snippets/schemas/snippet";
@@ -39,6 +40,10 @@ describe("snippet validation", () => {
     expect(snippetIdSchema.safeParse("../../another-user").success).toBe(false);
     expect(
       snippetIdSchema.safeParse("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa").success,
+    ).toBe(true);
+    expect(publicIdSchema.safeParse("not-a-public-id").success).toBe(false);
+    expect(
+      publicIdSchema.safeParse("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb").success,
     ).toBe(true);
   });
 

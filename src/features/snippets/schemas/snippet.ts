@@ -34,6 +34,7 @@ export const snippetInputSchema = z.object({
 });
 
 export const snippetIdSchema = z.uuid();
+export const publicIdSchema = z.uuid();
 
 export function snippetInputFromFormData(formData: FormData) {
   const text = (name: string) => {

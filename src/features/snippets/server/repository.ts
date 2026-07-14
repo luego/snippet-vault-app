@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { SnippetSearchParams } from "@/features/snippets/schemas/search-params";
 import type {
   DashboardSummary,
+  PublicSnippet,
   SnippetListItem,
   SnippetTag,
   TagSummary,
@@ -14,7 +15,9 @@ import type { Database, Json } from "@/lib/supabase/types";
 type DatabaseClient = SupabaseClient<Database>;
 
 const detailColumns =
-  "id,title,description,code,language,visibility,is_favorite,copy_count,created_at,updated_at" as const;
+  "id,public_id,title,description,code,language,visibility,is_favorite,copy_count,created_at,updated_at" as const;
+const publicColumns =
+  "id,public_id,title,description,code,language,updated_at" as const;
 
 function parseTags(value: Json): SnippetTag[] {
   if (!Array.isArray(value)) return [];
@@ -125,6 +128,53 @@ export async function getSnippetTags(
       links.map((link) => link.tag_id),
     )
     .order("normalized_name");
+}
+
+export async function getPublicSnippet(
+  client: DatabaseClient,
+  publicId: string,
+) {
+  const { data: snippet, error } = await client
+    .from("snippets")
+    .select(publicColumns)
+    .eq("public_id", publicId)
+    .eq("visibility", "public")
+    .maybeSingle();
+
+  if (error || !snippet) {
+    return { data: null, error };
+  }
+
+  const { data: links, error: linkError } = await client
+    .from("snippet_tags")
+    .select("tag_id")
+    .eq("snippet_id", snippet.id);
+  if (linkError) return { data: null, error: linkError };
+
+  let tags: SnippetTag[] = [];
+  if (links?.length) {
+    const tagResult = await client
+      .from("tags")
+      .select("id,name,normalized_name")
+      .in(
+        "id",
+        links.map((link) => link.tag_id),
+      )
+      .order("normalized_name");
+    if (tagResult.error) return { data: null, error: tagResult.error };
+    tags = tagResult.data ?? [];
+  }
+
+  const data: PublicSnippet = {
+    publicId: snippet.public_id,
+    title: snippet.title,
+    description: snippet.description,
+    code: snippet.code,
+    language: snippet.language,
+    updatedAt: snippet.updated_at,
+    tags,
+  };
+  return { data, error: null };
 }
 
 export async function listTagSummaries(client: DatabaseClient, limit = 100) {

@@ -7,7 +7,6 @@ import { useRef } from "react";
 import {
   deleteSnippet,
   duplicateSnippet,
-  setSnippetVisibility,
   toggleFavorite,
 } from "@/features/snippets/actions/snippets";
 import type { SnippetDetail } from "@/features/snippets/types";
@@ -39,17 +38,6 @@ export function SnippetActions({ snippet }: { snippet: SnippetDetail }) {
         <button className="button button-secondary" type="submit">
           <Star className="size-4" />
           {snippet.is_favorite ? "Unfavorite" : "Favorite"}
-        </button>
-      </form>
-      <form action={setSnippetVisibility}>
-        <input type="hidden" name="snippetId" value={snippet.id} />
-        <input
-          type="hidden"
-          name="visibility"
-          value={snippet.visibility === "private" ? "public" : "private"}
-        />
-        <button className="button button-secondary" type="submit">
-          Make {snippet.visibility === "private" ? "public" : "private"}
         </button>
       </form>
       <button

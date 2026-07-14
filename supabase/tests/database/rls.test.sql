@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(7);
+select plan(10);
 
 insert into auth.users (
   id, instance_id, aud, role, email, encrypted_password,
@@ -46,6 +46,12 @@ insert into public.tags (id, owner_id, name, normalized_name) values
   (
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3',
     '22222222-2222-2222-2222-222222222222', 'B tag', 'b tag'
+  );
+
+insert into public.snippet_tags (snippet_id, tag_id) values
+  (
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2',
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3'
   );
 
 set local role authenticated;
@@ -105,6 +111,18 @@ select is(
   'Anonymous users can read a public snippet'
 );
 
+select is(
+  (select count(*) from public.snippet_tags where snippet_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2'),
+  1::bigint,
+  'Anonymous users can read tag links for a public snippet'
+);
+
+select is(
+  (select count(*) from public.tags where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3'),
+  1::bigint,
+  'Anonymous users can read tags used by a public snippet'
+);
+
 reset role;
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
@@ -120,6 +138,12 @@ select is(
   (select count(*) from public.snippets where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2'),
   0::bigint,
   'Revoking public visibility immediately blocks anonymous access'
+);
+
+select is(
+  (select count(*) from public.snippet_tags where snippet_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2'),
+  0::bigint,
+  'Revoking public visibility also hides anonymous tag links'
 );
 
 select * from finish();

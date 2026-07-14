@@ -2,7 +2,9 @@
 
 A production-minded, responsive developer workspace for saving, organizing, searching, and selectively sharing reusable code snippets.
 
-> Current status: Milestone 4. Secure snippet CRUD, URL-driven search/filter/sort/pagination, favorites, tag navigation, live dashboard summaries, copy feedback, and server-side syntax highlighting are implemented. Public share pages and final polish begin in Milestone 5.
+> Current status: Milestone 5 complete. Snippet Vault includes secure snippet management, revocable public sharing, account settings, responsive and keyboard-accessible flows, metadata controls, and production verification.
+
+![Snippet Vault landing page and dashboard preview](./docs/snippet-vault-landing.jpg)
 
 ## Features
 
@@ -18,7 +20,10 @@ A production-minded, responsive developer workspace for saving, organizing, sear
 - Shareable URL filters for query, language, tag, favorite, visibility, and sort
 - Live dashboard totals, recent snippets, top tags, favorites, and tag overview
 - Responsive snippet editor, collection, detail, and delete-confirmation experiences
+- Revocable read-only public links with safe metadata and public tag display
+- Profile and persisted light, dark, or system theme preferences
 - Server-rendered Shiki highlighting with line numbers and inert user content
+- Marketing/legal sitemap, private-route crawl controls, and a branded social image
 - Typed public/server environment boundaries
 - Security headers and a minimal health endpoint
 - Safe redirect, tag normalization, language allowlist, and URL-search validation utilities
@@ -99,12 +104,12 @@ Export the three public variables before building because Next.js embeds browser
 
 ## Deployment
 
-Deploy to Vercel or any host that supports the standalone Next.js output. Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS origin, configure the browser-safe Supabase URL and publishable key, and add the matching callback URL to Supabase Auth. A live demo URL and product screenshot will be added before release.
+Deploy to Vercel or any host that supports the standalone Next.js output. Set `NEXT_PUBLIC_APP_URL` to the canonical HTTPS origin, configure the browser-safe Supabase URL and publishable key, and add the matching callback URL to Supabase Auth. This repository does not prescribe a live demo domain; use the deployed canonical URL as the demo link.
 
 ## Security
 
-Current controls include strict server/client environment separation, a restrictive baseline CSP, clickjacking and MIME-sniffing headers, safe internal redirect validation, React text rendering for user content, token-based server syntax rendering, non-root container execution, server-validated mutations, verified Supabase claims, least-privilege grants, and RLS policies tested with isolated users. See [SECURITY.md](./SECURITY.md).
+Current controls include strict server/client environment separation, a restrictive baseline CSP, clickjacking and MIME-sniffing headers, safe internal redirect validation, React text rendering for user content, token-based server syntax rendering, non-root container execution, server-validated mutations, verified Supabase claims, least-privilege grants, and RLS policies tested with isolated users. Public snippet pages are read-only, omit owner/internal identifiers, and default to `noindex`. See [SECURITY.md](./SECURITY.md).
 
 ## Trade-offs and future work
 
-Milestone 5 adds revocable anonymous public sharing, public metadata controls, final accessibility/responsive polish, screenshots, and the remaining critical-path E2E coverage.
+Public links intentionally remain `noindex` for privacy, copy counts are not mutated by anonymous viewers, and avatar settings accept an HTTPS URL instead of managing uploads. A deployment URL, object-storage avatar uploads, optional share expiration, and third-party observability can be added per environment without weakening the current authorization boundary.

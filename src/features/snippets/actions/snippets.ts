@@ -165,14 +165,17 @@ export async function setSnippetVisibility(formData: FormData) {
 
   const claims = await requireVerifiedClaims();
   const client = await createClient();
-  const { error } = await client
+  const { data, error } = await client
     .from("snippets")
     .update({ visibility })
     .eq("id", parsedId.data)
-    .eq("owner_id", claims.sub);
+    .eq("owner_id", claims.sub)
+    .select("public_id")
+    .maybeSingle();
 
   if (error) logSnippetError("visibility update", error);
   revalidateSnippetPaths(parsedId.data);
+  if (data?.public_id) revalidatePath(`/s/${data.public_id}`);
 }
 
 export async function recordSnippetCopy(snippetId: string) {

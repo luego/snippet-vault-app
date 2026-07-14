@@ -7,6 +7,7 @@ import { requireVerifiedClaims } from "@/features/auth/server/session";
 import { CodeBlock } from "@/features/snippets/components/code-block";
 import { CopyButton } from "@/features/snippets/components/copy-button";
 import { SnippetActions } from "@/features/snippets/components/snippet-actions";
+import { ShareSettings } from "@/features/snippets/components/share-settings";
 import { snippetIdSchema } from "@/features/snippets/schemas/snippet";
 import {
   getSnippet,
@@ -129,6 +130,11 @@ export default async function SnippetDetailPage({
               <p>No tags</p>
             )}
           </div>
+          <ShareSettings
+            snippetId={snippet.id}
+            publicId={snippet.public_id}
+            visibility={snippet.visibility}
+          />
         </aside>
       </div>
     </main>

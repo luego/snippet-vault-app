@@ -4,7 +4,7 @@ import { BrandMark } from "@/components/shared/brand-mark";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="auth-shell">
+    <main className="auth-shell" id="main-content" tabIndex={-1}>
       <section className="auth-showcase" aria-label="About Snippet Vault">
         <BrandMark />
         <div>
